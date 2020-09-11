@@ -65,9 +65,9 @@ class App extends Component {
                 </NavLink>
               </div>
               <div className='header-links'>
-                <a href={'https://github.com/mlflow/mlflow'}>
+                <a href={'https://www.couture.ai/'}>
                   <div className='github'>
-                    <span>GitHub</span>
+                    <span>couture.ai</span>
                   </div>
                 </a>
                 <a href={'https://mlflow.org/docs/latest/index.html'}>
