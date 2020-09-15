@@ -21,6 +21,7 @@ from collections import namedtuple
 import pandas
 from distutils.version import LooseVersion
 from contextlib import contextmanager
+import numpy as np
 
 import mlflow
 import mlflow.keras
@@ -537,8 +538,7 @@ class _TF2Wrapper(object):
         self.infer = infer
 
     def predict(self, df):
-        import tensorflow
-
+        import tensorflow   
         feed_dict = {}
         for df_col_name in list(df):
             # If there are multiple columns with the same name, selecting the shared name
@@ -548,6 +548,7 @@ class _TF2Wrapper(object):
             val = df[df_col_name]
             if isinstance(val, pandas.DataFrame):
                 val = val.values
+            val = np.array(list(val))
             feed_dict[df_col_name] = tensorflow.constant(val)
         raw_preds = self.infer(**feed_dict)
         pred_dict = {col_name: raw_preds[col_name].numpy() for col_name in raw_preds.keys()}
