@@ -38,7 +38,7 @@ class App extends Component {
             <header className='App-header'>
               <div className='mlflow-logo'>
                 <Link to={Routes.rootRoute} className='App-mlflow'>
-                  <img className='mlflow-logo' alt='MLflow' src={logo} />
+                  <img className='mlflow-logo'  style={{ width: '25vh', height: 'auto' }} alt='couture.ai' src={logo} />
                 </Link>
               </div>
               <div className='header-route-links'>
