@@ -1,4 +1,5 @@
 import React from 'react';
+import Toggle from 'react-toggle';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { modelListPageRoute, getModelPageRoute } from '../routes';
@@ -44,11 +45,28 @@ export class ModelVersionViewImpl extends React.Component {
     isDeleteModalConfirmLoading: false,
     showDescriptionEditor: false,
     isTagsRequestPending: false,
+    isModelDeployed: false,
+    modelInferenceAPI: 'Not Deployed'
   };
 
   componentDidMount() {
     const pageTitle = `${this.props.modelName} v${this.props.modelVersion.version} - MLflow Model`;
     Utils.updatePageTitle(pageTitle);
+  }
+
+  handleModelDeployment = () => {
+    if (this.state.isModelDeployed == true){
+       this.setState({
+      isModelDeployed: false,
+      modelInferenceAPI:'Not Deployed'
+    });
+  }
+    else {
+      this.setState({
+        isModelDeployed: true,
+        modelInferenceAPI:'127.0.0.1:6000/sample_predict_endpoint/'
+      });  
+    }
   }
 
   handleDeleteConfirm = () => {
@@ -274,6 +292,16 @@ export class ModelVersionViewImpl extends React.Component {
           </Descriptions.Item>
           <Descriptions.Item label='Source Run' className='linked-run'>
             {this.resolveRunLink()}
+          </Descriptions.Item>
+          <br/>
+          <Descriptions.Item label='Deployment Status'>
+          <Toggle
+            defaultChecked={this.state.isModelDeployed}
+            onChange={this.handleModelDeployment}
+          />
+          </Descriptions.Item>
+          <Descriptions.Item label='Inference API'>
+            {this.state.modelInferenceAPI}
           </Descriptions.Item>
         </Descriptions>
 
