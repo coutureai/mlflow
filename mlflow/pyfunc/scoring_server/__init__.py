@@ -11,6 +11,7 @@ Defines two endpoints:
     /invocations used for scoring
 """
 from collections import OrderedDict
+from pydoc import locate
 import flask
 import json
 import logging
@@ -49,12 +50,16 @@ CONTENT_TYPE_JSON_RECORDS_ORIENTED = "application/json; format=pandas-records"
 CONTENT_TYPE_JSON_SPLIT_ORIENTED = "application/json; format=pandas-split"
 CONTENT_TYPE_JSON_SPLIT_NUMPY = "application/json-numpy-split"
 
+# Couture.ai Content Types
+CONTENT_TYPE_COUTURE_INFERENCE = "application/couture-inference"
+
 CONTENT_TYPES = [
     CONTENT_TYPE_CSV,
     CONTENT_TYPE_JSON,
     CONTENT_TYPE_JSON_RECORDS_ORIENTED,
     CONTENT_TYPE_JSON_SPLIT_ORIENTED,
     CONTENT_TYPE_JSON_SPLIT_NUMPY,
+    CONTENT_TYPE_COUTURE_INFERENCE,
 ]
 
 _logger = logging.getLogger(__name__)
@@ -127,6 +132,65 @@ def parse_split_oriented_json_input_to_numpy(json_input):
         )
 
 
+def parse_json_input_to_df(json_input):
+    """
+    :param json_input: A JSON-formatted string representation of a Pandas DataFrame.
+    
+    Ex: 
+    {
+        "columns": [
+            {"name": "zip", "type": "numpy.float32"},
+            {"name": "cost", "type": "float"},
+            {"name": "count", "type": "numpy.float16"}
+        ], 
+        "data": [
+            [
+                [[1, 2, 3], [4, 5, 6]],
+                10.45,
+                -8
+            ],
+            [
+                [[[2, 3, 4], [4, 5, 6]]],
+                23.0,
+                -1
+            ],
+            [
+                [4, 5, 6],
+                12.1,
+                1000
+            ]
+        ]
+    }
+    """
+    # pylint: disable=broad-except
+    try:
+        json_input = json.loads(json_input, object_pairs_hook=OrderedDict)
+        columns = json_input["columns"]
+        col_names = list(map(lambda x: x["name"], columns))
+        data = pd.DataFrame(data=json_input["data"], columns=col_names)
+        converted_data = pd.DataFrame({})
+        for col in columns:
+            col_name = col["name"]
+            col_type = col["type"]
+
+            col_type = locate(col_type)
+            if isinstance(data[col_name][0], list):
+                col_data = data[col_name].map(lambda x: np.array(x, dtype=col_type))
+            else:
+                col_data = data[col_name].astype(col_type)
+            converted_data.insert(0, col_name, col_data, True)
+        return converted_data
+    except Exception as e:
+        _logger.error(e, exc_info=1)
+        # TODO: Change error message here.
+        _handle_serving_error(
+            error_message=(
+                "Failed to parse input."
+            ),
+            error_code=MALFORMED_REQUEST,
+        )
+
+
 def predictions_to_json(raw_predictions, output):
     predictions = _get_jsonable_obj(raw_predictions, pandas_orient="records")
     json.dump(predictions, output, cls=NumpyEncoder)
@@ -194,6 +258,8 @@ def init(model: PyFuncModel):
             )
         elif flask.request.content_type == CONTENT_TYPE_JSON_SPLIT_NUMPY:
             data = parse_split_oriented_json_input_to_numpy(flask.request.data.decode("utf-8"))
+        elif flask.request.content_type == CONTENT_TYPE_COUTURE_INFERENCE:
+            data = parse_json_input_to_df(flask.request.data.decode("utf-8"))
         else:
             return flask.Response(
                 response=(
