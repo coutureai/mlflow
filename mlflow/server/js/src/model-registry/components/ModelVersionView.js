@@ -57,8 +57,8 @@ export class ModelVersionViewImpl extends React.Component {
   handleModelDeployment = () => {
     if (this.state.isModelDeployed == true){
        this.setState({
-      isModelDeployed: false,
-      modelInferenceAPI:'Not Deployed'
+        isModelDeployed: false,
+        modelInferenceAPI:'Not Deployed'
     });
   }
     else {
