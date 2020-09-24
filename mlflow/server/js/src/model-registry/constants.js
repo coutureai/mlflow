@@ -76,6 +76,8 @@ export const REGISTERED_MODELS_SEARCH_NAME_FIELD = 'name';
 
 export const REGISTERED_MODELS_SEARCH_TIMESTAMP_FIELD = 'timestamp';
 
+export const MODEL_DEPLOYMENT_URL = '<WEBSERVER_DEPLOYMENT_ENDPOINT>';
+
 export const AntdTableSortOrder = {
   ASC: 'ascend',
   DESC: 'descend',

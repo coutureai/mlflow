@@ -14,6 +14,7 @@ import {
   DefaultModelVersionStatusMessages,
   ACTIVE_STAGES,
   MODEL_VERSION_DELETE_MENU_ITEM_DISABLED_TOOLTIP_TEXT,
+  MODEL_DEPLOYMENT_URL,
 } from '../constants';
 import Routers from '../../experiment-tracking/routes';
 import { CollapsibleSection } from '../../common/components/CollapsibleSection';
@@ -54,18 +55,35 @@ export class ModelVersionViewImpl extends React.Component {
     Utils.updatePageTitle(pageTitle);
   }
 
+  sendDeploymentRequest(action) {
+    var modelInfo = this.props.modelVersion;
+    if (action === 'deploy')
+      modelInfo['action']='deploy';
+    else
+      modelInfo['action']='remove';
+    var xhr = new XMLHttpRequest()
+    xhr.addEventListener('load', () => {
+      console.log(xhr.responseText)
+    })
+    xhr.open('POST', MODEL_DEPLOYMENT_URL)
+    // send the request
+    xhr.send(JSON.stringify(modelInfo))
+  }
+
   handleModelDeployment = () => {
-    if (this.state.isModelDeployed == true){
+    if (this.state.isModelDeployed === true){
        this.setState({
         isModelDeployed: false,
         modelInferenceAPI:'Not Deployed'
     });
-  }
+    this.sendDeploymentRequest('remove')
+  } 
     else {
       this.setState({
         isModelDeployed: true,
-        modelInferenceAPI:'127.0.0.1:6000/sample_predict_endpoint/'
-      });  
+        modelInferenceAPI: MODEL_DEPLOYMENT_URL
+      });
+      this.sendDeploymentRequest('deploy')
     }
   }
 
