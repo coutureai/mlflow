@@ -1,5 +1,5 @@
 import React from 'react';
-import Toggle from 'react-toggle';
+import Switch from "react-switch";
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { modelListPageRoute, getModelPageRoute } from '../routes';
@@ -15,6 +15,7 @@ import {
   ACTIVE_STAGES,
   MODEL_VERSION_DELETE_MENU_ITEM_DISABLED_TOOLTIP_TEXT,
   MODEL_DEPLOYMENT_URL,
+  MODEL_INFERENCE_API
 } from '../constants';
 import Routers from '../../experiment-tracking/routes';
 import { CollapsibleSection } from '../../common/components/CollapsibleSection';
@@ -53,14 +54,32 @@ export class ModelVersionViewImpl extends React.Component {
   componentDidMount() {
     const pageTitle = `${this.props.modelName} v${this.props.modelVersion.version} - MLflow Model`;
     Utils.updatePageTitle(pageTitle);
+    this.checkDeploymentStatus(this.props.modelVersion.run_id)
+  }
+  
+  checkDeploymentStatus(modelId) {
+    var xhr = new XMLHttpRequest()
+    xhr.addEventListener('load', () => {
+      if (xhr.responseText ==="deployed") {
+        this.setState({
+          isModelDeployed: true,
+          modelInferenceAPI: MODEL_INFERENCE_API+'/'+this.props.modelVersion.run_id,
+        });
+      }
+      else {
+        this.setState({
+          isModelDeployed: false,
+          modelInferenceAPI: "Not nope",
+        });
+      }
+    });
+    xhr.open('GET',MODEL_DEPLOYMENT_URL+"?runId="+modelId)
+    xhr.send()
   }
 
   sendDeploymentRequest(action) {
     var modelInfo = this.props.modelVersion;
-    if (action === 'deploy')
-      modelInfo['action']='deploy';
-    else
-      modelInfo['action']='remove';
+      modelInfo['action']=action;
     var xhr = new XMLHttpRequest()
     xhr.addEventListener('load', () => {
       console.log(xhr.responseText)
@@ -81,7 +100,7 @@ export class ModelVersionViewImpl extends React.Component {
     else {
       this.setState({
         isModelDeployed: true,
-        modelInferenceAPI: MODEL_DEPLOYMENT_URL
+        modelInferenceAPI: MODEL_INFERENCE_API+'/'+this.props.modelVersion.run_id,
       });
       this.sendDeploymentRequest('deploy')
     }
@@ -313,12 +332,12 @@ export class ModelVersionViewImpl extends React.Component {
           </Descriptions.Item>
           <br/>
           <Descriptions.Item label='Deployment Status'>
-          <Toggle
-            defaultChecked={this.state.isModelDeployed}
+          <Switch 
             onChange={this.handleModelDeployment}
+            checked={this.state.isModelDeployed}
           />
           </Descriptions.Item>
-          <Descriptions.Item label='Inference API'>
+          <Descriptions.Item label='GrPC Inference API'>
             {this.state.modelInferenceAPI}
           </Descriptions.Item>
         </Descriptions>

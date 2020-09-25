@@ -76,7 +76,9 @@ export const REGISTERED_MODELS_SEARCH_NAME_FIELD = 'name';
 
 export const REGISTERED_MODELS_SEARCH_TIMESTAMP_FIELD = 'timestamp';
 
-export const MODEL_DEPLOYMENT_URL = '<WEBSERVER_DEPLOYMENT_ENDPOINT>';
+export const MODEL_DEPLOYMENT_URL = 'http://localhost:8080/deploy';
+
+export const MODEL_INFERENCE_API = 'tfserving:8500';
 
 export const AntdTableSortOrder = {
   ASC: 'ascend',
