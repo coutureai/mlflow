@@ -56,51 +56,68 @@ export class ModelVersionViewImpl extends React.Component {
     Utils.updatePageTitle(pageTitle);
     this.checkDeploymentStatus(this.props.modelVersion.run_id)
   }
-  
+
   checkDeploymentStatus(modelId) {
     var xhr = new XMLHttpRequest()
     xhr.addEventListener('load', () => {
-      if (xhr.responseText ==="deployed") {
+      if (xhr.responseText === "deployed") {
         this.setState({
           isModelDeployed: true,
-          modelInferenceAPI: MODEL_INFERENCE_API+'/'+this.props.modelVersion.run_id,
+          modelInferenceAPI: MODEL_INFERENCE_API + '/' + this.props.modelVersion.run_id,
         });
       }
       else {
         this.setState({
           isModelDeployed: false,
-          modelInferenceAPI: "Not nope",
+          modelInferenceAPI: "Not Deployed",
         });
       }
     });
-    xhr.open('GET',MODEL_DEPLOYMENT_URL+"?runId="+modelId)
+    xhr.onerror = function (e) {
+      console.log(e)
+      this.setState({
+        isModelDeployed: false,
+        modelInferenceAPI: 'Server not reachable.'
+      });
+    }.bind(this);
+    xhr.open('GET', MODEL_DEPLOYMENT_URL + "?runId=" + modelId)
     xhr.send()
   }
 
+
+
   sendDeploymentRequest(action) {
     var modelInfo = this.props.modelVersion;
-      modelInfo['action']=action;
+    modelInfo['action'] = action;
     var xhr = new XMLHttpRequest()
     xhr.addEventListener('load', () => {
       console.log(xhr.responseText)
     })
-    xhr.open('POST', MODEL_DEPLOYMENT_URL)
+    // catch error
+    xhr.onerror = function (e) {
+      console.log(e)
+      this.setState({
+        isModelDeployed: false,
+        modelInferenceAPI: 'Server not reachable.'
+      });
+    }.bind(this);
     // send the request
+    xhr.open('POST', MODEL_DEPLOYMENT_URL)
     xhr.send(JSON.stringify(modelInfo))
   }
 
   handleModelDeployment = () => {
-    if (this.state.isModelDeployed === true){
-       this.setState({
+    if (this.state.isModelDeployed === true) {
+      this.setState({
         isModelDeployed: false,
-        modelInferenceAPI:'Not Deployed'
-    });
-    this.sendDeploymentRequest('remove')
-  } 
+        modelInferenceAPI: 'Not Deployed'
+      });
+      this.sendDeploymentRequest('remove')
+    }
     else {
       this.setState({
         isModelDeployed: true,
-        modelInferenceAPI: MODEL_INFERENCE_API+'/'+this.props.modelVersion.run_id,
+        modelInferenceAPI: MODEL_INFERENCE_API + '/' + this.props.modelVersion.run_id,
       });
       this.sendDeploymentRequest('deploy')
     }
@@ -207,10 +224,10 @@ export class ModelVersionViewImpl extends React.Component {
             </Tooltip>
           </Menu.Item>
         ) : (
-          <Menu.Item onClick={this.showDeleteModal} className='delete'>
-            Delete
-          </Menu.Item>
-        )}
+            <Menu.Item onClick={this.showDeleteModal} className='delete'>
+              Delete
+            </Menu.Item>
+          )}
       </Menu>
     );
     return (
@@ -321,8 +338,8 @@ export class ModelVersionViewImpl extends React.Component {
                 onSelect={handleStageTransitionDropdownSelect}
               />
             ) : (
-              StageTagComponents[modelVersion.current_stage]
-            )}
+                StageTagComponents[modelVersion.current_stage]
+              )}
           </Descriptions.Item>
           <Descriptions.Item label='Last Modified'>
             {Utils.formatTimestamp(modelVersion.last_updated_timestamp)}
@@ -330,12 +347,12 @@ export class ModelVersionViewImpl extends React.Component {
           <Descriptions.Item label='Source Run' className='linked-run'>
             {this.resolveRunLink()}
           </Descriptions.Item>
-          <br/>
+          <br />
           <Descriptions.Item label='Deployment Status'>
-          <Switch 
-            onChange={this.handleModelDeployment}
-            checked={this.state.isModelDeployed}
-          />
+            <Switch
+              onChange={this.handleModelDeployment}
+              checked={this.state.isModelDeployed}
+            />
           </Descriptions.Item>
           <Descriptions.Item label='GrPC Inference API'>
             {this.state.modelInferenceAPI}
