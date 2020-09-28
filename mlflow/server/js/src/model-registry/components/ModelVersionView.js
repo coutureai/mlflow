@@ -17,6 +17,10 @@ import {
   MODEL_DEPLOYMENT_URL,
   MODEL_INFERENCE_API
 } from '../constants';
+import {
+  checkDeploymentStatus,
+  sendDeploymentRequest
+} from '../utils.js';
 import Routers from '../../experiment-tracking/routes';
 import { CollapsibleSection } from '../../common/components/CollapsibleSection';
 import { EditableNote } from '../../common/components/EditableNote';
@@ -51,75 +55,40 @@ export class ModelVersionViewImpl extends React.Component {
     modelInferenceAPI: 'Not Deployed'
   };
 
+  updateDeploymentState(status,inferenceApi){
+    this.setState({
+      isModelDeployed:status,
+      modelInferenceAPI:inferenceApi
+    });
+  }
+
   componentDidMount() {
     const pageTitle = `${this.props.modelName} v${this.props.modelVersion.version} - MLflow Model`;
     Utils.updatePageTitle(pageTitle);
-    this.checkDeploymentStatus(this.props.modelVersion.run_id)
-  }
-
-  checkDeploymentStatus(modelId) {
-    var xhr = new XMLHttpRequest()
-    xhr.addEventListener('load', () => {
-      if (xhr.responseText === "deployed") {
-        this.setState({
-          isModelDeployed: true,
-          modelInferenceAPI: MODEL_INFERENCE_API + '/' + this.props.modelVersion.run_id,
-        });
-      }
-      else {
-        this.setState({
-          isModelDeployed: false,
-          modelInferenceAPI: "Not Deployed",
-        });
-      }
-    });
-    xhr.onerror = function (e) {
-      console.log(e)
-      this.setState({
-        isModelDeployed: false,
-        modelInferenceAPI: 'Server not reachable.'
-      });
-    }.bind(this);
-    xhr.open('GET', MODEL_DEPLOYMENT_URL + "?runId=" + modelId)
-    xhr.send()
-  }
-
-
-
-  sendDeploymentRequest(action) {
-    var modelInfo = this.props.modelVersion;
-    modelInfo['action'] = action;
-    var xhr = new XMLHttpRequest()
-    xhr.addEventListener('load', () => {
-      console.log(xhr.responseText)
-    })
-    // catch error
-    xhr.onerror = function (e) {
-      console.log(e)
-      this.setState({
-        isModelDeployed: false,
-        modelInferenceAPI: 'Server not reachable.'
-      });
-    }.bind(this);
-    // send the request
-    xhr.open('POST', MODEL_DEPLOYMENT_URL)
-    xhr.send(JSON.stringify(modelInfo))
+    checkDeploymentStatus(
+      this.props.modelVersion.run_i,
+      MODEL_DEPLOYMENT_URL,
+      MODEL_INFERENCE_API,
+      this.updateDeploymentState.bind(this));
   }
 
   handleModelDeployment = () => {
+    var modelInfo = this.props.modelVersion;
     if (this.state.isModelDeployed === true) {
-      this.setState({
-        isModelDeployed: false,
-        modelInferenceAPI: 'Not Deployed'
-      });
-      this.sendDeploymentRequest('remove')
+      this.updateDeploymentState(false,'Not Deployed');
+      sendDeploymentRequest(
+        'remove',
+        MODEL_DEPLOYMENT_URL,
+        modelInfo,
+        this.updateDeploymentState.bind(this));
     }
     else {
-      this.setState({
-        isModelDeployed: true,
-        modelInferenceAPI: MODEL_INFERENCE_API + '/' + this.props.modelVersion.run_id,
-      });
-      this.sendDeploymentRequest('deploy')
+      this.updateDeploymentState(true, MODEL_INFERENCE_API + '/' + this.props.modelVersion.run_id)
+      sendDeploymentRequest(
+        'deploy',
+        MODEL_DEPLOYMENT_URL,
+        modelInfo,
+        this.updateDeploymentState.bind(this));
     }
   }
 
