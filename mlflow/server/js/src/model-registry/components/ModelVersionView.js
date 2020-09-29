@@ -1,5 +1,5 @@
 import React from 'react';
-import Toggle from 'react-toggle';
+import Switch from "react-switch";
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { modelListPageRoute, getModelPageRoute } from '../routes';
@@ -14,7 +14,13 @@ import {
   DefaultModelVersionStatusMessages,
   ACTIVE_STAGES,
   MODEL_VERSION_DELETE_MENU_ITEM_DISABLED_TOOLTIP_TEXT,
+  MODEL_DEPLOYMENT_URL,
+  MODEL_INFERENCE_API
 } from '../constants';
+import {
+  checkDeploymentStatus,
+  sendDeploymentRequest
+} from '../utils.js';
 import Routers from '../../experiment-tracking/routes';
 import { CollapsibleSection } from '../../common/components/CollapsibleSection';
 import { EditableNote } from '../../common/components/EditableNote';
@@ -49,23 +55,40 @@ export class ModelVersionViewImpl extends React.Component {
     modelInferenceAPI: 'Not Deployed'
   };
 
+  updateDeploymentState(status,inferenceApi){
+    this.setState({
+      isModelDeployed:status,
+      modelInferenceAPI:inferenceApi
+    });
+  }
+
   componentDidMount() {
     const pageTitle = `${this.props.modelName} v${this.props.modelVersion.version} - MLflow Model`;
     Utils.updatePageTitle(pageTitle);
+    checkDeploymentStatus(
+      this.props.modelVersion.run_i,
+      MODEL_DEPLOYMENT_URL,
+      MODEL_INFERENCE_API,
+      this.updateDeploymentState.bind(this));
   }
 
   handleModelDeployment = () => {
-    if (this.state.isModelDeployed == true){
-       this.setState({
-        isModelDeployed: false,
-        modelInferenceAPI:'Not Deployed'
-    });
-  }
+    var modelInfo = this.props.modelVersion;
+    if (this.state.isModelDeployed === true) {
+      this.updateDeploymentState(false,'Not Deployed');
+      sendDeploymentRequest(
+        'remove',
+        MODEL_DEPLOYMENT_URL,
+        modelInfo,
+        this.updateDeploymentState.bind(this));
+    }
     else {
-      this.setState({
-        isModelDeployed: true,
-        modelInferenceAPI:'127.0.0.1:6000/sample_predict_endpoint/'
-      });  
+      this.updateDeploymentState(true, MODEL_INFERENCE_API + '/' + this.props.modelVersion.run_id)
+      sendDeploymentRequest(
+        'deploy',
+        MODEL_DEPLOYMENT_URL,
+        modelInfo,
+        this.updateDeploymentState.bind(this));
     }
   }
 
@@ -170,10 +193,10 @@ export class ModelVersionViewImpl extends React.Component {
             </Tooltip>
           </Menu.Item>
         ) : (
-          <Menu.Item onClick={this.showDeleteModal} className='delete'>
-            Delete
-          </Menu.Item>
-        )}
+            <Menu.Item onClick={this.showDeleteModal} className='delete'>
+              Delete
+            </Menu.Item>
+          )}
       </Menu>
     );
     return (
@@ -284,8 +307,8 @@ export class ModelVersionViewImpl extends React.Component {
                 onSelect={handleStageTransitionDropdownSelect}
               />
             ) : (
-              StageTagComponents[modelVersion.current_stage]
-            )}
+                StageTagComponents[modelVersion.current_stage]
+              )}
           </Descriptions.Item>
           <Descriptions.Item label='Last Modified'>
             {Utils.formatTimestamp(modelVersion.last_updated_timestamp)}
@@ -293,14 +316,14 @@ export class ModelVersionViewImpl extends React.Component {
           <Descriptions.Item label='Source Run' className='linked-run'>
             {this.resolveRunLink()}
           </Descriptions.Item>
-          <br/>
+          <br />
           <Descriptions.Item label='Deployment Status'>
-          <Toggle
-            defaultChecked={this.state.isModelDeployed}
-            onChange={this.handleModelDeployment}
-          />
+            <Switch
+              onChange={this.handleModelDeployment}
+              checked={this.state.isModelDeployed}
+            />
           </Descriptions.Item>
-          <Descriptions.Item label='Inference API'>
+          <Descriptions.Item label='GrPC Inference API'>
             {this.state.modelInferenceAPI}
           </Descriptions.Item>
         </Descriptions>
