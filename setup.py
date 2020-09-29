@@ -54,6 +54,7 @@ setup(
         "sqlalchemy<=1.3.13",
         "gorilla",
         "prometheus-flask-exporter",
+        "pymysql>=0.10.0",
     ],
     extras_require={
         "extras": [
@@ -64,7 +65,7 @@ setup(
             "mleap>=0.16.0",
             "azure-storage-blob>=12.0",
             "google-cloud-storage",
-            "azureml-core>=1.2.0",
+            "azureml-core>=1.2.0"
         ],
         "sqlserver": ["mlflow-dbstore",],
         "aliyun-oss": ["aliyunstoreplugin",],
