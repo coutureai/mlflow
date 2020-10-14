@@ -4,6 +4,12 @@ WORKDIR /app
 
 ADD . /app
 
+ARG REACT_APP_MODEL_DEPLOYMENT_URL
+ARG REACT_APP_MODEL_INFERENCE_API
+
+ENV REACT_APP_MODEL_DEPLOYMENT_URL ${REACT_APP_MODEL_INFERENCE_API}
+ENV REACT_APP_MODEL_INFERENCE_API ${REACT_APP_MODEL_INFERENCE_API}
+
 RUN apt-get update && \
     # install prequired modules to support install of mlflow and related components
     apt-get install -y default-libmysqlclient-dev build-essential curl \
