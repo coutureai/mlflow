@@ -66,7 +66,7 @@ export class ModelVersionViewImpl extends React.Component {
     const pageTitle = `${this.props.modelName} v${this.props.modelVersion.version} - MLflow Model`;
     Utils.updatePageTitle(pageTitle);
     checkDeploymentStatus(
-      this.props.modelVersion.run_i,
+      this.props.modelVersion.run_id,
       MODEL_DEPLOYMENT_URL,
       MODEL_INFERENCE_API,
       this.updateDeploymentState.bind(this));
