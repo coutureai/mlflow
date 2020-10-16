@@ -10,6 +10,7 @@ export const getProtoField = (fieldName) => `${fieldName}`;
 
 export const checkDeploymentStatus = (modelId, deploymentUrl, inferenceApi, callback) => {
     var xhr = new XMLHttpRequest()
+    console.log(modelId)
     xhr.addEventListener('load', () => {
         if (xhr.responseText =="deployed"){
             callback(true,inferenceApi+'/'+modelId)
