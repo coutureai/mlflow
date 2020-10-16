@@ -13,9 +13,7 @@ import {
   ModelVersionStatusIcons,
   DefaultModelVersionStatusMessages,
   ACTIVE_STAGES,
-  MODEL_VERSION_DELETE_MENU_ITEM_DISABLED_TOOLTIP_TEXT,
-  MODEL_DEPLOYMENT_URL,
-  MODEL_INFERENCE_API
+  MODEL_VERSION_DELETE_MENU_ITEM_DISABLED_TOOLTIP_TEXT
 } from '../constants';
 import {
   checkDeploymentStatus,
@@ -29,6 +27,9 @@ import EditableTagsTableView from '../../common/components/EditableTagsTableView
 import { getModelVersionTags } from '../reducers';
 import { setModelVersionTagApi, deleteModelVersionTagApi } from '../actions';
 import { connect } from 'react-redux';
+
+var MODEL_DEPLOYMENT_URL="http://"+window.location.hostname+":8080/workflow/deploy";
+var MODEL_INFERENCE_API=window.location.hostname+":8500";
 
 export class ModelVersionViewImpl extends React.Component {
   static propTypes = {
