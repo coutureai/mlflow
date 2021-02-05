@@ -58,7 +58,7 @@ class HomeView extends Component {
           <div className='experiment-view-container'>
             <div className='lead'>
               To create a new experiment programmatically, use notebook{' '}
-              <a href='workflow/jupyter_notebook'>here.</a>
+              <a href='/workflow/jupyter_notebook'>here.</a>
             </div>
             {this.props.experimentId !== undefined ? (
               <ExperimentPage experimentId={this.props.experimentId} />
@@ -82,7 +82,7 @@ class HomeView extends Component {
           <div className='experiment-page-container'>
             <div className='lead'>
               To create a new experiment programmatically, use notebook{' '}
-              <a href='workflow/jupyter_notebook'>here.</a>
+              <a href='/workflow/jupyter_notebook'>here.</a>
             </div>
             {this.props.experimentId !== undefined ? (
               <ExperimentPage experimentId={this.props.experimentId} />
