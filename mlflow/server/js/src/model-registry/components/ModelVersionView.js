@@ -28,7 +28,7 @@ import { getModelVersionTags } from '../reducers';
 import { setModelVersionTagApi, deleteModelVersionTagApi } from '../actions';
 import { connect } from 'react-redux';
 
-var MODEL_DEPLOYMENT_URL="http://"+window.location.hostname+":8080/workflow/deploy";
+var MODEL_DEPLOYMENT_URL="http://"+window.location.hostname+":5000/workflow/deploy";
 var MODEL_INFERENCE_API=window.location.hostname+":8500";
 
 export class ModelVersionViewImpl extends React.Component {
