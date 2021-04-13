@@ -121,7 +121,7 @@ Autologging:
 
 PyTorch:
 
-- ``mlflow.pytorch.log_model``, ``mlflow.pytorch.load_model`` now support logging/loading TorchScript models (#3557, @shrinath-suresh) 
+- ``mlflow.pytorch.log_model``, ``mlflow.pytorch.load_model`` now support logging/loading TorchScript models (#3557, @shrinath-suresh)
 - ``mlflow.pytorch.log_model`` supports passing ``requirements_file`` & ``extra_files`` arguments to log additional artifacts along with a model (#3436, @shrinath-suresh)
 
 
