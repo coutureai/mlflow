@@ -1,5 +1,19 @@
 Changelog
 =========
+
+1.11.1 (2021-04-02)
+-------------------
+MLflow 1.11.0 includes several major features and improvements:
+
+Bug fixes :
+
+- Added base version in DockerFile
+- Updated requirements accordingly
+
+Features:
+
+- Updated the API calls to deploy interms of model_name and model_version instead of model_run_id
+
 1.11.0 (2020-08-31)
 -------------------
 MLflow 1.11.0 includes several major features and improvements:

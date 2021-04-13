@@ -1,4 +1,4 @@
-FROM continuumio/miniconda3
+FROM continuumio/miniconda3:4.8.2
 
 WORKDIR /app
 
@@ -9,22 +9,23 @@ ARG REACT_APP_MODEL_INFERENCE_API
 
 ENV REACT_APP_MODEL_DEPLOYMENT_URL ${REACT_APP_MODEL_INFERENCE_API}
 ENV REACT_APP_MODEL_INFERENCE_API ${REACT_APP_MODEL_INFERENCE_API}
-
-RUN apt-get update && \
+#Ri pip install --upgrade pip
+RUN apt-get update 
     # install prequired modules to support install of mlflow and related components
-    apt-get install -y default-libmysqlclient-dev build-essential curl \
+RUN apt-get install -y default-libmysqlclient-dev build-essential curl \
     # cmake and protobuf-compiler required for onnx install
-    cmake protobuf-compiler &&  \
+    cmake protobuf-compiler 
     # install required python packages
-    pip install -r dev-requirements.txt --no-cache-dir && \
-    pip install -r test-requirements.txt --no-cache-dir && \
+RUN pip install --upgrade pip
+RUN pip install --use-deprecated=legacy-resolver -r dev-requirements.txt --no-cache-dir 
+RUN pip install --use-deprecated=legacy-resolver -r test-requirements.txt --no-cache-dir
     # install mlflow in editable form
-    pip install --no-cache-dir -e . && \
+RUN pip install --use-deprecated=legacy-resolver --no-cache-dir -e .
     # mkdir required to support install openjdk-11-jre-headless
-    mkdir -p /usr/share/man/man1 && apt-get install -y openjdk-11-jre-headless && \
+RUN mkdir -p /usr/share/man/man1 && apt-get install -y openjdk-11-jre-headless 
     # install npm for node.js support
-    curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
-    apt-get update && apt-get install -y nodejs && \
-    cd mlflow/server/js && \
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - 
+RUN apt-get update && apt-get install -y nodejs 
+RUN cd mlflow/server/js && \
     npm install && \
     npm run build

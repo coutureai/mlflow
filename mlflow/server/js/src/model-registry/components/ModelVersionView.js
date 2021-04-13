@@ -28,7 +28,7 @@ import { getModelVersionTags } from '../reducers';
 import { setModelVersionTagApi, deleteModelVersionTagApi } from '../actions';
 import { connect } from 'react-redux';
 
-var MODEL_DEPLOYMENT_URL="http://"+window.location.hostname+":5000/workflow/deploy";
+var MODEL_DEPLOYMENT_URL="http://"+window.location.hostname+":8080/workflow/trainedmodelsview/deploy"   //+":5000/workflow/deploy";
 var MODEL_INFERENCE_API=window.location.hostname+":8500";
 
 export class ModelVersionViewImpl extends React.Component {
@@ -67,12 +67,12 @@ export class ModelVersionViewImpl extends React.Component {
     const pageTitle = `${this.props.modelName} v${this.props.modelVersion.version} - MLflow Model`;
     Utils.updatePageTitle(pageTitle);
     checkDeploymentStatus(
-      this.props.modelVersion.run_id,
+      this.props.modelVersion.name +"_"+this.props.modelVersion.version,
+      // this.props.modelVersion.run_id,
       MODEL_DEPLOYMENT_URL,
       MODEL_INFERENCE_API,
       this.updateDeploymentState.bind(this));
   }
-
   handleModelDeployment = () => {
     var modelInfo = this.props.modelVersion;
     if (this.state.isModelDeployed === true) {
